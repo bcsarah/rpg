@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <!-- Metadados, identidade visual e ponto de entrada da ficha Everwinter. -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#121212">
+    <title>Everwinter — Ficha</title>
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+    <!-- Cabeçalho: título, ações de arquivo e criação de ficha. -->
+    <header class="topbar">
+        <div class="brand">
+            <span class="eyebrow">Ficha de personagem</span>
+            <h1>Everwinter</h1>
+        </div>
+
+        <div class="actions">
+            <button id="exportBtn" class="button primary">
+                Exportar JSON
+            </button>
+
+            <label class="button secondary file-button" for="importFile">
+                Importar
+            </label>
+
+            <input
+                id="importFile"
+                type="file"
+                accept=".json,application/json"
+                hidden
+            >
+
+            <button id="resetBtn" class="button danger">
+                Nova ficha
+            </button>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- Identificação e progressão: nível é derivado do XP. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Identidade</span>
+                    <h2>Personagem</h2>
+                </div>
+            </div>
+
+            <div class="fields identity-fields">
+                <label>
+                    Nome
+                    <input
+                        data-field="name"
+                        placeholder="Nome do personagem"
+                        autocomplete="off"
+                    >
+                </label>
+
+                <label>
+                    Classe
+                    <select data-field="class">
+                        <option value="">Selecione</option>
+                        <option>Guerreiro</option>
+                        <option>Patrulheiro</option>
+                        <option>Ladino</option>
+                        <option>Mago</option>
+                        <option>Clérigo</option>
+                        <option>Bardo</option>
+                    </select>
+                </label>
+
+                <label>
+                    Raça
+                    <input data-field="race" placeholder="Raça">
+                </label>
+
+                <label class="level-field">
+                    Nível
+                    <input id="levelDisplay" type="number" value="1" readonly>
+                </label>
+
+                <label>
+                    XP
+                    <input data-field="xp" type="number" min="0" step="1" value="0">
+                </label>
+            </div>
+        </section>
+
+        <!-- Atributos: pontos definem o dado e o botão realiza a rolagem. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Dados-base</span>
+                    <h2>Atributos</h2>
+                </div>
+            </div>
+
+            <p class="help">
+                Clique no nome para rolar. Pontos de 0 a 4 definem
+                d4, d6, d8, d10 ou d12.
+            </p>
+
+            <div id="attributes" class="attribute-grid"></div>
+        </section>
+
+        <!-- Perícias comuns e de combate têm pontos próprios e rolagem combinada. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Conhecimentos</span>
+                    <h2>Perícias</h2>
+                </div>
+            </div>
+
+            <p class="help">
+                Rola o dado do atributo e o da perícia; mantém o maior,
+                ou aplica crítico/falha crítica.
+            </p>
+
+            <div id="skills" class="skill-grid"></div>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Confronto</span>
+                    <h2>Perícias de combate</h2>
+                </div>
+            </div>
+
+            <div id="combatSkills" class="skill-grid"></div>
+        </section>
+
+        <!-- Salvaguardas treináveis: treinadas rolam dois dados do mesmo atributo. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Resistências</span>
+                    <h2>Salvaguardas</h2>
+                </div>
+            </div>
+
+            <p class="help">
+                Treinar uma salvaguarda permite rolar dois dados do atributo
+                indicado e aplicar as regras de rolagem.
+            </p>
+
+            <div id="saves" class="save-grid"></div>
+        </section>
+
+        <!-- Recursos de combate e sobrevivência, incluindo redução de dano. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Estado</span>
+                    <h2>Recursos</h2>
+                </div>
+            </div>
+
+            <div class="resource-grid">
+                <label>
+                    PV atuais
+                    <input data-field="currentHp" type="number" min="0">
+                </label>
+
+                <label>
+                    PV máximos
+                    <input data-field="maxHp" type="number" min="0">
+                </label>
+
+                <label>
+                    PM atuais
+                    <input data-field="currentMp" type="number" min="0">
+                </label>
+
+                <label>
+                    PM máximos
+                    <input data-field="maxMp" type="number" min="0">
+                </label>
+
+                <label>
+                    Defesa
+                    <input data-field="defense" type="number" min="0">
+                </label>
+
+                <label>
+                    RD
+                    <input data-field="damageReduction" type="number" min="0">
+                </label>
+
+                <label>
+                    Réis
+                    <input data-field="money" type="number" min="0">
+                </label>
+            </div>
+        </section>
+
+        <!-- Equipamentos em uso ficam separados da lista de itens carregados. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Uso</span>
+                    <h2>Equipamentos</h2>
+                </div>
+            </div>
+
+            <label>
+                Equipamentos equipados
+                <textarea
+                    data-field="equipment"
+                    rows="4"
+                    placeholder="Armas, armaduras, escudos e acessórios..."
+                ></textarea>
+            </label>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Carga</span>
+                    <h2>Inventário</h2>
+                </div>
+            </div>
+
+            <label>
+                Itens carregados
+                <textarea
+                    data-field="inventory"
+                    rows="5"
+                    placeholder="Itens, consumíveis, ferramentas e outros..."
+                ></textarea>
+            </label>
+        </section>
+
+        <!-- Magias ficam organizadas por círculo, do 0 ao 5. -->
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Conjuração</span>
+                    <h2>Magias</h2>
+                </div>
+            </div>
+
+            <div class="magic-grid">
+                <label>
+                    Círculo 0
+                    <textarea data-magic="0" rows="3" placeholder="Magias de círculo 0..."></textarea>
+                </label>
+
+                <label>
+                    Círculo 1
+                    <textarea data-magic="1" rows="3" placeholder="Magias de círculo 1..."></textarea>
+                </label>
+
+                <label>
+                    Círculo 2
+                    <textarea data-magic="2" rows="3" placeholder="Magias de círculo 2..."></textarea>
+                </label>
+
+                <label>
+                    Círculo 3
+                    <textarea data-magic="3" rows="3" placeholder="Magias de círculo 3..."></textarea>
+                </label>
+
+                <label>
+                    Círculo 4
+                    <textarea data-magic="4" rows="3" placeholder="Magias de círculo 4..."></textarea>
+                </label>
+
+                <label>
+                    Círculo 5
+                    <textarea data-magic="5" rows="3" placeholder="Magias de círculo 5..."></textarea>
+                </label>
+            </div>
+        </section>
+
+        <!-- Anotações livres, isoladas dos demais campos de ficha. -->
+        <section class="panel notes-panel">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Livre</span>
+                    <h2>Anotações</h2>
+                </div>
+            </div>
+
+            <label>
+                Notas
+                <textarea
+                    data-field="notes"
+                    rows="7"
+                    placeholder="Detalhes, lembretes, objetivos e informações..."
+                ></textarea>
+            </label>
+        </section>
+    </main>
+
+    <!-- Registro de rolagens e status de salvamento ficam sempre acessíveis. -->
+    <aside class="roll-log" aria-live="polite">
+        <div class="log-header">
+            <strong>Rolagens</strong>
+            <button id="clearLog" class="button secondary small">
+                Limpar
+            </button>
+        </div>
+
+        <div id="logEntries">
+            <p class="help">
+                Clique em um atributo, perícia ou salvaguarda para rolar.
+            </p>
+        </div>
+    </aside>
+
+    <footer>
+        <span id="saveStatus">Salvamento local ativado</span>
+    </footer>
+
+    <script src="script/script.js"></script>
+</body>
+</html>
